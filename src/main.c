@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "../include/search.h"
+#include "../include/searchfile.h"
 
 typedef enum{
     NO_OPT,
@@ -13,7 +13,6 @@ void cgrep_find_in_file(int inputCount, char **input) {
     char *filename = input[0];
     char *pattern = input[1];
     printf("searching for '%s' in %s\n", pattern, filename);
-    // TODO make sure the file exists
     
     cgrep_search(filename, pattern);
 }

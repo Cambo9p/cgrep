@@ -3,7 +3,7 @@ CC = gcc
 
 CFLAGS = -Wall -Werror
 
-SRC = src/main.c src/search.c src/hashmap.c
+SRC = src/main.c src/searchfile.c src/hashmap.c
 OBJ = $(SRC:.c=.o)
 
 TARGET = cgrep
@@ -16,3 +16,4 @@ $(TARGET): $(OBJ)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
+	rm -f *.txt
