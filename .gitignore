@@ -1,2 +1,4 @@
 pride_and_prejudice.txt
 the_black_drama.txt
+*.o
+cgrep

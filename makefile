@@ -1,7 +1,7 @@
 CC = gcc
 
 
-CFLAGS = -Wall 
+CFLAGS = -Wall -Werror
 
 SRC = src/main.c src/search.c src/hashmap.c
 OBJ = $(SRC:.c=.o)
