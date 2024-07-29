@@ -51,7 +51,6 @@ extern void map_put(map_t map, char key, int val) {
 
 extern int map_get(map_t map, char key) {
     hashmap_t *m = (hashmap_t*)map;
-    // TODO correct error checking
     if ((int)key > 127 || (int)key < SPACE_VAL) {
         return -1;
     }

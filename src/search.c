@@ -25,7 +25,7 @@ static void cgrep_linear_search(char *filename, char *pattern) {
 
     fp = fopen(filename, "r");
     if (fp == NULL) {
-        perror("file not found\n");
+        fprintf(stderr, "file '%s' not found\n", filename);
         fclose(fp);
         exit(-1);
     }
