@@ -10,7 +10,7 @@ static void boyer_moore_search(char *pattern, char *buffer, int buffSize);
 static map_t shift_table_create(char *pattern, int len);
 /*static bool str_contains(char *str, char ch);*/
   
-void cgrep_search(char *filename, char *pattern) {
+void cgrep_search_file(char *filename, char *pattern) {
     // TODO add option parsing
     cgrep_linear_search(filename, pattern);
 }

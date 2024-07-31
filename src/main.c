@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "../include/searchfile.h"
+#include "../include/searchdir.h"
 
 typedef enum{
     RECURSIVE_OPT,
@@ -10,13 +12,22 @@ typedef enum{
     COUNT_OPT,
 } Options_t;
 
-// takes array with filename and 
+// Parses the input and searches for the pattesh in the file
 void cgrep_find_in_file(int inputCount, char **input) {
     char *filename = input[1];
     char *pattern = input[0];
     printf("searching for '%s' in %s\n", pattern, filename);
     
-    cgrep_search(filename, pattern);
+    cgrep_search_file(filename, pattern);
+}
+
+// Parses the input and searches for the pattesh in the directory
+void cgrep_find_in_dir(int inputCount, char **input) {
+    char *directory = input[1];
+    char *pattern = input[0];
+    printf("searching for '%s' in %s directory\n", pattern, directory);
+
+    cgrep_search_dir(directory, pattern);
 }
 
 void cgrep_read_from_stdin() {
@@ -29,7 +40,8 @@ void cgrep_read_from_stdin() {
 
 int main(int argc, char *argv[]) {
     int opt;
-    Options_t *options;
+    //Options_t options[3];
+    bool recursive = false;
     
     int i = 0;
     while ((opt = getopt(argc, argv, "rcn")) != -1) {
@@ -37,13 +49,13 @@ int main(int argc, char *argv[]) {
             case 'r':
                 // TODO
                 //printf("option %s\n",optarg); // this is when 'r:' is used
-                options[i] = RECURSIVE_OPT;
+                recursive = true;
                 break;
             case 'c':
-                options[i] = COUNT_OPT;
+                //options[i] = COUNT_OPT;
                 break;
             case 'n':
-                options[i] = LINE_NUM_OPT;
+                //options[i] = LINE_NUM_OPT;
                 break;
             default:
                 break;
@@ -60,9 +72,13 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    // TODO multi opt parsing
 
-    cgrep_find_in_file(numArgs, args);
+    if (recursive) {
+        cgrep_find_in_dir(numArgs, args);
+
+    } else {
+        cgrep_find_in_file(numArgs, args);
+    }
 
     return 0;
 }
