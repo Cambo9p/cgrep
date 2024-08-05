@@ -4,20 +4,28 @@
 #include <stdbool.h>
 #include <strings.h>
 #include "../include/hashmap.h"
+#include "../include/args.h"
 
-static void cgrep_linear_search(char *filename, char *pattern);
+static void cgrep_linear_search(grep_args_t *args);
 static void boyer_moore_search(char *pattern, char *buffer, int buffSize);
 static map_t shift_table_create(char *pattern, int len);
-/*static bool str_contains(char *str, char ch);*/
   
 void cgrep_search_file(char *filename, char *pattern) {
     // TODO add option parsing
-    cgrep_linear_search(filename, pattern);
+    grep_args_t *args = (grep_args_t*) malloc(sizeof(grep_args_t));
+    //args->pattern = pattern;
+    strcpy(args->pattern, pattern);
+    //args->filename = filename;
+    strcpy(args->filename, filename);
+    cgrep_linear_search(args);
+    free(args);
 }
 
 
 // naive linear search
-static void cgrep_linear_search(char *filename, char *pattern) {
+static void cgrep_linear_search(grep_args_t *args) {
+    char *filename = args->filename;
+    char *pattern = args->pattern;
     FILE *fp;
     long lSize;
     size_t result;

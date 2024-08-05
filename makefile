@@ -1,7 +1,7 @@
 CC = gcc
 
 
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -lpthread 
 
 SRC = src/main.c src/searchfile.c src/searchdir.c src/hashmap.c 
 #SRC = src/*.c
@@ -18,3 +18,6 @@ $(TARGET): $(OBJ)
 clean:
 	rm -f $(OBJ) $(TARGET)
 	rm -f *.txt
+
+test:
+	gcc -std=c99 -g -o test src/main.o src/searchfile.o src/searchdir.o src/hashmap.o
