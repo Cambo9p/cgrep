@@ -3,7 +3,8 @@ CC = gcc
 
 CFLAGS = -Wall -Werror
 
-SRC = src/main.c src/searchfile.c src/hashmap.c
+SRC = src/main.c src/searchfile.c src/searchdir.c src/hashmap.c 
+#SRC = src/*.c
 OBJ = $(SRC:.c=.o)
 
 TARGET = cgrep

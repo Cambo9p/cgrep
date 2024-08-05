@@ -25,7 +25,6 @@ void cgrep_find_in_file(int inputCount, char **input) {
 void cgrep_find_in_dir(int inputCount, char **input) {
     char *directory = input[1];
     char *pattern = input[0];
-    printf("searching for '%s' in %s directory\n", pattern, directory);
 
     cgrep_search_dir(directory, pattern);
 }
