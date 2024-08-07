@@ -16,6 +16,7 @@ typedef struct worker_t worker_T;
 
 static void *recursive_dfs(void *arg);
 static void init_workers(grep_args_t *workers[], char *pattern);
+static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], int numWorkers);
 
 // searches the current directory for all files, and sub directories
 void cgrep_search_dir(char *dir, char *pattern) {
@@ -26,7 +27,6 @@ void cgrep_search_dir(char *dir, char *pattern) {
     grep_args_t *workers[NUM_THREADS];
     int numfiles = 0;
 
-    // TODO: memset to reduce sec risks
     memset(workers, 0, sizeof(workers));
     init_workers(workers, pattern);
 
@@ -54,17 +54,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
     }
     closedir(d);
 
-    printf("ntesrtrnse\n");
-    // double free in here
-    for (int j = 0; j < numfiles; j++) {
-        if (pthread_join(threads[j], NULL) != 0) {
-            perror("error joining thread");
-            exit(1);
-        }
-        free(workers[j]->filename);
-        free(workers[j]->results);
-        free(workers[j]);
-    }
+    join_and_free_workers(threads, workers, numfiles);
 }
 
 static void *recursive_dfs(void *arg) {
@@ -89,6 +79,18 @@ static void init_workers(grep_args_t *workers[], char *pattern) {
         strcpy(workers[i]->filename, "");
         strcpy(workers[i]->pattern, pattern);
     }
+}
 
+// waits for all threads to finish and frees all memory
+static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], int numWorkers) {
+    for (int j = 0; j < numWorkers; j++) {
+        if (pthread_join(threads[j], NULL) != 0) {
+            perror("error joining thread");
+            exit(1);
+        }
+        free(workers[j]->filename);
+        free(workers[j]->results);
+        free(workers[j]);
+    }
 
 }
