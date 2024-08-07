@@ -13,7 +13,9 @@
 #define NUM_THREADS 50
 
 typedef struct worker_t worker_T;
+
 static void *recursive_dfs(void *arg);
+static void init_workers(grep_args_t *workers[], char *pattern);
 
 // searches the current directory for all files, and sub directories
 void cgrep_search_dir(char *dir, char *pattern) {
@@ -24,14 +26,9 @@ void cgrep_search_dir(char *dir, char *pattern) {
     grep_args_t *workers[NUM_THREADS];
     int numfiles = 0;
 
-    for (int i = 0; i < NUM_THREADS; i++) {
-        workers[i] = (grep_args_t*)malloc(sizeof(grep_args_t));
-        if (workers[i] == NULL) perror("error allocating space");
-
-        workers[i]->results = (char*)malloc(sizeof(char*)); 
-        strcpy(workers[i]->filename, "");
-        strcpy(workers[i]->pattern, pattern);
-    }
+    // TODO: memset to reduce sec risks
+    memset(workers, 0, sizeof(workers));
+    init_workers(workers, pattern);
 
     d = opendir(path);
     if (!d) {
@@ -39,28 +36,34 @@ void cgrep_search_dir(char *dir, char *pattern) {
     }
 
     int i = 0;
-    while ((dirstr = readdir(d)) != NULL) {
+    while ((dirstr = readdir(d)) != NULL && i < NUM_THREADS) {
         if (dirstr->d_type == DT_REG) {
             printf("found %s\n", dirstr->d_name);
             strcat(workers[i]->filename, path);
-            pthread_create(&threads[i], NULL, recursive_dfs, workers[i]);
+            if (pthread_create(&threads[i], NULL, recursive_dfs, workers[i])) {
+                perror("error creating thread");
+                exit(-1);
+            }
             numfiles++;
+            i++;
         } else if (dirstr->d_type == DT_DIR 
                     && strcmp(".", dirstr->d_name) != 0 
                     && strcmp("..", dirstr->d_name) != 0) {
             printf("found the dir %s\n", dirstr->d_name);
         }
-        i++;
     }
+    closedir(d);
 
     printf("ntesrtrnse\n");
     // double free in here
     for (int j = 0; j < numfiles; j++) {
+        if (pthread_join(threads[j], NULL) != 0) {
+            perror("error joining thread");
+            exit(1);
+        }
         free(workers[j]->filename);
         free(workers[j]->results);
-        printf("in\n");
         free(workers[j]);
-        pthread_join(threads[j], NULL);
     }
 }
 
@@ -69,4 +72,23 @@ static void *recursive_dfs(void *arg) {
     printf("got into the thread for dir %s\n", threadWorker->filename);
 
 	pthread_exit(NULL);
+}
+
+// inits array of workers
+static void init_workers(grep_args_t *workers[], char *pattern) {
+    for (int i = 0; i < NUM_THREADS; i++) {
+        workers[i] = (grep_args_t*)malloc(sizeof(grep_args_t));
+        if (workers[i] == NULL) perror("error allocating space");
+
+        workers[i]->results = (char*)malloc(1024); 
+        if (workers[i]->results == NULL) perror("error allocating space");
+
+        workers[i]->filename = (char*)malloc(1024); 
+        if (workers[i]->filename == NULL) perror("error allocating space");
+
+        strcpy(workers[i]->filename, "");
+        strcpy(workers[i]->pattern, pattern);
+    }
+
+
 }
