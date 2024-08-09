@@ -62,8 +62,6 @@ void qfree(queue_t* queue) {
 }
 
 void qprint(queue_t* queue) {
-    printf("en print\n");
-    printf("%d", queue->len);
     for (int i = 0; i < queue->len; i++) {
         printf("%s ", queue->arr[i]);
     }

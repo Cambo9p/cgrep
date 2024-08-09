@@ -55,11 +55,9 @@ void cgrep_search_dir(char *dir, char *pattern) {
                     && strcmp(".", dirstr->d_name) != 0 
                     && strcmp("..", dirstr->d_name) != 0) {
             printf("found the dir %s\n", dirstr->d_name);
-            // TODO may need to strcpy inside the queue
             qPush(queue, dirstr->d_name);
         }
     }
-    printf("printing");
     qprint(queue);
     qfree(queue);
 
