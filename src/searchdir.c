@@ -43,8 +43,10 @@ void cgrep_search_dir(char *dir, char *pattern) {
     int i = 0;
     while ((dirstr = readdir(d)) != NULL && i < NUM_THREADS) {
         if (dirstr->d_type == DT_REG) {
-            printf("found %s\n", dirstr->d_name);
+            //printf("found %s\n", dirstr->d_name);
             strcat(workers[i]->filename, path);
+            strcat(workers[i]->filename, dirstr->d_name);
+
             if (pthread_create(&threads[i], NULL, recursive_dfs, workers[i])) {
                 perror("error creating thread");
                 exit(-1);
@@ -54,7 +56,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
         } else if (dirstr->d_type == DT_DIR 
                     && strcmp(".", dirstr->d_name) != 0 
                     && strcmp("..", dirstr->d_name) != 0) {
-            printf("found the dir %s\n", dirstr->d_name);
+            //printf("found the dir %s\n", dirstr->d_name);
             qPush(queue, dirstr->d_name);
         }
     }
