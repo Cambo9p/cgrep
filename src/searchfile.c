@@ -104,7 +104,7 @@ static void handle_line(int start, int end, char *buffer, grep_args_t *args) {
     formatLine(line, start - p1, end - p1);
     args->results[args->curr] = line;
     args->curr++;
-    printf("%s", line);
+    //printf("%s", line);
     //printf("%s", args->results[args->curr]);
 }
 
@@ -128,7 +128,6 @@ void boyer_moore_search(char *pattern, char *buffer, int buffSize,grep_args_t *a
             int tableVal = map_get(table, buffer[index]); 
             int shift = (tableVal == -1) ? pLen : tableVal;
             if (shift + index >= buffSize) {
-                //printf("done\n");
                 return;
             }
             index += shift;

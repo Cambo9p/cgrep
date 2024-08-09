@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     // TODO: if we use -r we shouldnt have to pass in the filename
     // so we will need to make argrs[0]
-    if (numArgs != 2) {
+    if ((numArgs != 2 && !recursive) || (numArgs != 1 && recursive)) {
         fprintf(stderr, "Useage: %s [-rcn] [word...] [file...]\n", argv[0]);
         exit(-1);
     }
