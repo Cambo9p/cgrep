@@ -5,30 +5,29 @@
 #include <strings.h>
 #include "../include/hashmap.h"
 #include "../include/args.h"
+#include "../include/formatted_ans.h"
 
-static void cgrep_linear_search(grep_args_t *args);
-static void boyer_moore_search(char *pattern, char *buffer, int buffSize);
+void boyer_moore_search(char *pattern, char *buffer, int buffSize, grep_args_t *args);
 static map_t shift_table_create(char *pattern, int len);
-  
+
+void cgrep_linear_search(grep_args_t *args);
+
 void cgrep_search_file(char *filename, char *pattern) {
-    // TODO add option parsing
     grep_args_t *args = (grep_args_t*) malloc(sizeof(grep_args_t));
     if (args == NULL) {
         perror("could not allocate memory for args");
         exit(1);
     }
-    args->filename = (char*)malloc(strlen(filename) + 1);
-    //args->pattern = pattern;
-    strcpy(args->pattern, pattern);
-    //args->filename = filename;
+    args = argsInit(pattern);
     strcpy(args->filename, filename);
+
     cgrep_linear_search(args);
     free(args);
 }
 
-
-// naive linear search
-static void cgrep_linear_search(grep_args_t *args) {
+// naive linear search 
+// TODO maybe return args for directory to use
+void cgrep_linear_search(grep_args_t *args) {
     char *filename = args->filename;
     char *pattern = args->pattern;
     FILE *fp;
@@ -63,7 +62,7 @@ static void cgrep_linear_search(grep_args_t *args) {
         exit(-1);
     }
 
-    boyer_moore_search(pattern, buffer, lSize);
+    boyer_moore_search(pattern, buffer, lSize, args);
 
     fclose(fp);
     free(buffer);
@@ -79,7 +78,37 @@ static map_t shift_table_create(char *pattern, int len) {
     return map;
 }
 
-void boyer_moore_search(char *pattern, char *buffer, int buffSize) {
+// called when the pattern is found, gets the last \n 
+// and next one then formats the 
+static void handle_line(int start, int end, char *buffer, grep_args_t *args) {
+    int p1 = start;
+    int p2 = end;
+    int len = strlen(buffer);
+    while (p1 > 0 && buffer[p1 - 1] != '\n') {
+        p1--;
+    }
+
+    while (p2 < len && buffer[p2] != '\n') {
+        p2++;
+    }
+
+    int line_len = p2 - p1;
+    char *line = (char*)malloc((line_len + 1) * sizeof(char));
+    if (line == NULL) {
+        perror("failed to allocate mem");
+        exit(1);
+    }
+    strncpy(line, buffer + p1, line_len);
+    line[line_len] = '\0';
+
+    formatLine(line, start - p1, end - p1);
+    args->results[args->curr] = line;
+    args->curr++;
+    printf("%s", line);
+    //printf("%s", args->results[args->curr]);
+}
+
+void boyer_moore_search(char *pattern, char *buffer, int buffSize,grep_args_t *args) {
     int pLen = strlen(pattern);
     map_t *table = shift_table_create(pattern, pLen);
 
@@ -93,14 +122,13 @@ void boyer_moore_search(char *pattern, char *buffer, int buffSize) {
         }
 
         if (offset == pLen) {
-            printf("found!!!!!\n");
-            printf("index %d to %d\n", index - offset + 1, index + 1);
+            handle_line(index - offset + 1, index + 1, buffer, args);
             index += pLen;
         } else {
             int tableVal = map_get(table, buffer[index]); 
             int shift = (tableVal == -1) ? pLen : tableVal;
             if (shift + index >= buffSize) {
-                printf("done\n");
+                //printf("done\n");
                 return;
             }
             index += shift;
