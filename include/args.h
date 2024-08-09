@@ -6,8 +6,10 @@ typedef struct grep_args {
     char *filename;
     char pattern[50];
     // results
-    char* results;
+    char **results;
+    int curr;
 } grep_args_t;
 
+grep_args_t* argsInit(char* pattern);
 
 #endif
