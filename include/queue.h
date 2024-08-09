@@ -12,11 +12,13 @@ typedef struct queue_t{
     char *(*qPop)(queue_t*);
     void (*qPush)(queue_t*, char*);
 
-    char *arr[];
+    char **arr;
 } queue_t;
 
 queue_t *qinit();
 char *qPop(queue_t* queue);
 void qPush(queue_t* queue, char* e);
+void qfree(queue_t* queue);
+void qprint(queue_t* queue);
 
 #endif

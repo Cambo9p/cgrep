@@ -13,6 +13,11 @@ static map_t shift_table_create(char *pattern, int len);
 void cgrep_search_file(char *filename, char *pattern) {
     // TODO add option parsing
     grep_args_t *args = (grep_args_t*) malloc(sizeof(grep_args_t));
+    if (args == NULL) {
+        perror("could not allocate memory for args");
+        exit(1);
+    }
+    args->filename = (char*)malloc(strlen(filename) + 1);
     //args->pattern = pattern;
     strcpy(args->pattern, pattern);
     //args->filename = filename;

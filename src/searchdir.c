@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <string.h>
 #include "../include/args.h"
+#include "../include/queue.h"
 
 
 #define INP 1
@@ -20,7 +21,7 @@ static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], i
 
 // searches the current directory for all files, and sub directories
 // currently, each file encountered is handled in its own thread and each 
-// directory is handled in a bfs manner
+// directory is handled in as a bfs search
 void cgrep_search_dir(char *dir, char *pattern) {
     pthread_t threads[NUM_THREADS];
     DIR *d;
@@ -28,6 +29,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
     char *path = "./";
     grep_args_t *workers[NUM_THREADS];
     int numfiles = 0;
+    queue_t *queue = qinit();
 
     memset(workers, 0, sizeof(workers));
     init_workers(workers, pattern);
@@ -36,6 +38,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
     if (!d) {
         perror("could not open current directory\n");
     }
+
 
     int i = 0;
     while ((dirstr = readdir(d)) != NULL && i < NUM_THREADS) {
@@ -52,10 +55,14 @@ void cgrep_search_dir(char *dir, char *pattern) {
                     && strcmp(".", dirstr->d_name) != 0 
                     && strcmp("..", dirstr->d_name) != 0) {
             printf("found the dir %s\n", dirstr->d_name);
-            // TODO handle the directory as bfs 
-            // TODO might need a queue
+            // TODO may need to strcpy inside the queue
+            qPush(queue, dirstr->d_name);
         }
     }
+    printf("printing");
+    qprint(queue);
+    qfree(queue);
+
     closedir(d);
 
     join_and_free_workers(threads, workers, numfiles);
