@@ -3,10 +3,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "../include/searchfile.h"
 #include "../include/searchdir.h"
+#include "../include/searchfile.h"
 
-typedef enum{
+typedef enum {
     RECURSIVE_OPT,
     LINE_NUM_OPT,
     COUNT_OPT,
@@ -66,8 +66,10 @@ int main(int argc, char *argv[]) {
     int numArgs = argc - optind;
     char **args = &argv[optind++];
 
+    // TODO: if we use -r we shouldnt have to pass in the filename
+    // so we will need to make argrs[0]
     if (numArgs != 2) {
-        fprintf(stderr, "Useage: %s [-rcn] [file...]\n", argv[0]);
+        fprintf(stderr, "Useage: %s [-rcn] [word...] [file...]\n", argv[0]);
         exit(-1);
     }
 
