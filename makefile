@@ -3,7 +3,7 @@ CC = gcc
 
 CFLAGS = -Wall -Werror -lpthread 
 
-SRC = src/main.c src/searchfile.c src/searchdir.c src/hashmap.c src/queue.c
+SRC = src/main.c src/searchfile.c src/searchdir.c src/hashmap.c src/queue.c src/formatted_ans.c src/args.c
 #SRC = src/*.c
 OBJ = $(SRC:.c=.o)
 
