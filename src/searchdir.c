@@ -7,6 +7,7 @@
 #include <string.h>
 #include "../include/args.h"
 #include "../include/queue.h"
+#include "../include/searchfile.h"
 
 
 #define INP 1
@@ -14,8 +15,9 @@
 #define NUM_THREADS 50
 
 typedef struct worker_t worker_T;
+result_t *res;
 
-static void *recursive_dfs(void *arg);
+static void *handle_file(void *arg);
 static void init_workers(grep_args_t *workers[], char *pattern);
 static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], int numWorkers);
 
@@ -30,6 +32,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
     grep_args_t *workers[NUM_THREADS];
     int numfiles = 0;
     queue_t *queue = qinit();
+    res = rInit();
 
     memset(workers, 0, sizeof(workers));
     init_workers(workers, pattern);
@@ -47,7 +50,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
             strcat(workers[i]->filename, path);
             strcat(workers[i]->filename, dirstr->d_name);
 
-            if (pthread_create(&threads[i], NULL, recursive_dfs, workers[i])) {
+            if (pthread_create(&threads[i], NULL, handle_file, workers[i])) {
                 perror("error creating thread");
                 exit(-1);
             }
@@ -60,6 +63,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
             qPush(queue, dirstr->d_name);
         }
     }
+    // handle all the queues recursively
     qprint(queue);
     qfree(queue);
 
@@ -68,28 +72,24 @@ void cgrep_search_dir(char *dir, char *pattern) {
     join_and_free_workers(threads, workers, numfiles);
 }
 
-static void *recursive_dfs(void *arg) {
+static void *handle_file(void *arg) {
 	grep_args_t* threadWorker = (grep_args_t *) arg;
     printf("got into the thread for dir %s\n", threadWorker->filename);
 
+    cgrep_linear_search(threadWorker);
+    // TODO we can get the results from the threadworker
 
+    for (int i = 0; i < threadWorker->curr; i++) {
+        printf("in here");
+        printf("%s",threadWorker->results[i]);
+    }
 	pthread_exit(NULL);
 }
 
 // inits array of workers
 static void init_workers(grep_args_t *workers[], char *pattern) {
     for (int i = 0; i < NUM_THREADS; i++) {
-        workers[i] = (grep_args_t*)malloc(sizeof(grep_args_t));
-        if (workers[i] == NULL) perror("error allocating space");
-
-        workers[i]->results = (char*)malloc(1024); 
-        if (workers[i]->results == NULL) perror("error allocating space");
-
-        workers[i]->filename = (char*)malloc(1024); 
-        if (workers[i]->filename == NULL) perror("error allocating space");
-
-        strcpy(workers[i]->filename, "");
-        strcpy(workers[i]->pattern, pattern);
+        workers[i] = argsInit(pattern);
     }
 }
 
@@ -105,5 +105,4 @@ static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], i
         free(workers[j]->results);
         free(workers[j]);
     }
-
 }
