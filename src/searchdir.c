@@ -19,6 +19,8 @@ static void init_workers(grep_args_t *workers[], char *pattern);
 static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], int numWorkers);
 
 // searches the current directory for all files, and sub directories
+// currently, each file encountered is handled in its own thread and each 
+// directory is handled in a bfs manner
 void cgrep_search_dir(char *dir, char *pattern) {
     pthread_t threads[NUM_THREADS];
     DIR *d;
@@ -50,6 +52,8 @@ void cgrep_search_dir(char *dir, char *pattern) {
                     && strcmp(".", dirstr->d_name) != 0 
                     && strcmp("..", dirstr->d_name) != 0) {
             printf("found the dir %s\n", dirstr->d_name);
+            // TODO handle the directory as bfs 
+            // TODO might need a queue
         }
     }
     closedir(d);
@@ -60,6 +64,7 @@ void cgrep_search_dir(char *dir, char *pattern) {
 static void *recursive_dfs(void *arg) {
 	grep_args_t* threadWorker = (grep_args_t *) arg;
     printf("got into the thread for dir %s\n", threadWorker->filename);
+
 
 	pthread_exit(NULL);
 }
@@ -88,6 +93,7 @@ static void join_and_free_workers(pthread_t threads[], grep_args_t *workers[], i
             perror("error joining thread");
             exit(1);
         }
+
         free(workers[j]->filename);
         free(workers[j]->results);
         free(workers[j]);
